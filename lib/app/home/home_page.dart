@@ -1,13 +1,38 @@
 import 'package:e_commerceapp/app/common_widgets/show_alert_dialog.dart';
 import 'package:e_commerceapp/app/home/cart_page.dart';
-import 'package:e_commerceapp/app/widgets/category.dart';
-import 'package:e_commerceapp/models/productss.dart';
+import 'package:e_commerceapp/app/tabs/home_tab.dart';
+import 'package:e_commerceapp/app/tabs/saved_tab.dart';
+import 'package:e_commerceapp/app/tabs/search_tab.dart';
+import 'package:e_commerceapp/app/widgets/bottom_tabs.dart';
 import 'package:e_commerceapp/services/auth.dart';
+import 'package:e_commerceapp/services/firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  FirestoreService _firebaseService = FirestoreService();
+  PageController _tabsPageController;
+  int _selectedTabs = 0;
+
+  @override
+  void initState() {
+    print("UserId: ${_firebaseService.getUserId()}");
+    _tabsPageController = PageController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _tabsPageController.dispose();
+    super.dispose();
+  }
+
   Future<void> _signOut(BuildContext context) async {
     try {
       final auth = Provider.of<AuthBase>(context, listen: false);
@@ -33,7 +58,6 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Home'),
         actions: <Widget>[
           IconButton(
               icon: new Icon(
@@ -52,28 +76,31 @@ class HomePage extends StatelessWidget {
               ))
         ],
       ),
-      body: ListView(
-        children: <Widget>[
-          SizedBox(height: 8.0),
-          Center(
-            child: Text(
-              'Categories',
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: PageView(
+              controller: _tabsPageController,
+              onPageChanged: (num) {
+                setState(() {
+                  _selectedTabs = num;
+                });
+              },
+              children: [
+                HomeTab(),
+                SavedTab(),
+                SearchTab(),
+              ],
             ),
           ),
-          SizedBox(height: 8.0),
-          Category(),
-          SizedBox(height: 8.0),
-          Center(
-            child: Text(
-              'Products',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-            ),
-          ),
-          SizedBox(height: 8.0),
-          Container(
-            height: 450,
-            child: Productss(),
+          BottomTabs(
+            seletecdTab: _selectedTabs,
+            tabPressed: (num) {
+              _tabsPageController.animateToPage(num,
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic);
+            },
           )
         ],
       ),

@@ -1,7 +1,7 @@
 import 'package:e_commerceapp/app/landing_page.dart';
-import 'package:e_commerceapp/models/cart.dart';
 import 'package:e_commerceapp/services/auth.dart';
-import 'package:e_commerceapp/services/auth_provider.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,6 +14,10 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+  static FirebaseAnalytics analytics = new FirebaseAnalytics();
+  static FirebaseAnalyticsObserver observer =
+      new FirebaseAnalyticsObserver(analytics: analytics);
+
   @override
   Widget build(BuildContext context) {
     return Provider<AuthBase>(
@@ -25,6 +29,7 @@ class MyApp extends StatelessWidget {
           ),
           primaryColor: Colors.blue[700],
         ),
+        navigatorObservers: <NavigatorObserver>[observer],
         home: LandingPage(),
       ),
     );
